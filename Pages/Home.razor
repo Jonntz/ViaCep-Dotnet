@@ -1,0 +1,38 @@
+﻿@page "/"
+@using Newtonsoft.Json;
+@using CorreiosApp.Models;
+
+
+<main class="form-blazor">
+  <div class="inputs-blazor">
+    <input @bind="infoCep.Cep" type="text" class="form-control" id="inputs-only-line" placeholder="CEP (somente números)">
+    <button @onclick="GetCepInfo" type="button" class="btn btn-primary mb-1 mt-2">Buscar</button>
+
+    <div class="content-recovery">
+      <div class="mids">
+        <input @bind="infoCep.Localidade" type="text" class="form-control input-data-recovery-mid" readonly placeholder="localidade">
+        <input @bind="infoCep.UF" type="text" class="form-control input-data-recovery-mid" readonly placeholder="UF">
+      </div>
+      <input @bind="infoCep.Logradouro" type="text" class="form-control input-data-recovery" readonly placeholder="logradouro">
+      <input @bind="infoCep.Bairro" type="text" class="form-control input-data-recovery" readonly placeholder="Bairro">
+    </div>
+  </div>
+</main>
+
+@code{
+  Address infoCep = new Address();
+
+  private async void GetCepInfo()
+  {
+    string url = $"https://viacep.com.br/ws/{infoCep.Cep}/json";
+
+    using(var client = new HttpClient())
+    {
+      HttpResponseMessage res = await client.GetAsync(url);
+      string json = await res.Content.ReadAsStringAsync();
+
+      infoCep = JsonConvert.DeserializeObject<Address>(json)!;
+      infoCep.Cep = infoCep.Cep.Replace("-", "");
+    }
+  }
+}
